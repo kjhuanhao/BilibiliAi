@@ -56,7 +56,6 @@ class ListenMessage:
             except Exception as e:
                 log.error(f"监听消息出现异常,向用户发送异常消息：{e}")
                 if 'current_message' in locals():
-                    continue
                     b.send_message(current_message.talker_id, f"出现异常，请联系管理员以下是异常信息: {e}")
                     b.ack_message(current_message.talker_id, current_message.ack_seqno)
                     continue
@@ -64,7 +63,3 @@ class ListenMessage:
                     log.info("current_message 未定义")
                     continue
 
-<<<<<<< HEAD
-=======
-
->>>>>>> b7a95bf9c4112378e0229d3b855587e8f91cbb1b
