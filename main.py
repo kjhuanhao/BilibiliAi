@@ -5,7 +5,9 @@
 # @Desc      : 启动程序
 
 from service.listener import ListenMessage
+from apscheduler.schedulers.blocking import BlockingScheduler
 
 if __name__ == "__main__":
-    ListenMessage.start()
-
+    schedule = BlockingScheduler()
+    schedule.add_job(ListenMessage.start, 'interval', seconds=40)
+    schedule.start()
