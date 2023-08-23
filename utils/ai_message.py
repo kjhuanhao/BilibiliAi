@@ -32,7 +32,7 @@ class CustomLLM:
         last_summary = self.get_json_completion(summary_single_system_prompt + prompt)
 
         if len(texts) == 1:
-            return "摘要:\n" + last_summary["summary"].replace("\n", "") + "\n亮点:\n" + "".join(["- " + highlight.replace("\n", "") + "\n" for highlight in last_summary["highlights"]])
+            return "\n摘要:\n" + last_summary["summary"].replace("\n", "") + "\n亮点:\n" + "".join(["- " + highlight.replace("\n", "") + "\n" for highlight in last_summary["highlights"]])
         summary = last_summary["summary"]
         highlights = last_summary["highlights"]
 
@@ -43,7 +43,7 @@ class CustomLLM:
             summary += current_summary["summary"]
             highlights += current_summary["highlights"]
 
-        return "摘要:\n" + summary.replace("\n", "") + "\n亮点:\n" + "".join(["- " + highlight.replace("\n", "") + "\n" for highlight in highlights])
+        return "\n摘要:\n" + summary.replace("\n", "") + "\n亮点:\n" + "".join(["- " + highlight.replace("\n", "") + "\n" for highlight in highlights])
 
     @retry_on_exception(3)
     def get_json_completion(self, prompt: str) -> Dict:
