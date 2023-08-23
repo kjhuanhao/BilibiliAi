@@ -36,8 +36,8 @@ class ListenMessage:
                         ack_message = b.ack_message(current_message.talker_id, current_message.ack_seqno)
                         log.info(f"已确认消息：{ack_message}")
 
-                        if message.content == "":
-                            send_message = b.send_message(message.talker_id, "您发送的视频信息格式不正确，请重新发送")
+                        if message.content is None:
+                            send_message = b.send_message(message.talker_id, "您发送的视频信息格式不正确，未寻找到视频的BV号，请重新发送")
                             log.info(f"发送AI消息完成：{send_message}")
                             break
 
@@ -63,3 +63,4 @@ class ListenMessage:
                     log.info("current_message 未定义")
                     continue
 
+    print("程序启动成功")

@@ -26,7 +26,7 @@ class CustomLLM:
 
     def summary(self, video_info: BilibiliVideoInfo) -> str:
         subtitle = video_info.subtitle
-        texts = self.get_text_spliter(subtitle, 3800)
+        texts = self.get_text_spliter(subtitle, 15000)
         log.info(f"视频字幕分割完成，共{len(texts)}段")
         prompt = f"视频标题: {video_info.title}\n 视频简介: {video_info.desc}\n 视频字幕: {texts[0]}"
         last_summary = self.get_json_completion(summary_single_system_prompt + prompt)
@@ -52,7 +52,7 @@ class CustomLLM:
             "Content-Type": "application/json"
         }
         data = {
-            "model": "gpt-3.5-turbo",
+            "model": "gpt-3.5-turbo-16k",
             "messages": [
                 {
                     "role": "user",

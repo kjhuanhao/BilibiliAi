@@ -9,10 +9,12 @@ import toml
 import time
 import random
 import json
+import re
 
-from typing import List
+from typing import List, Union
 from common.talker import Talker
 from common.video_info import BilibiliVideoInfo
+from common.log import log
 
 
 class Bilibili:
@@ -44,10 +46,9 @@ class Bilibili:
         follow_unread = unread_data["follow_unread"]
         return follow_unread
 
-    def get_message(self, is_bv: bool = True) -> List[Talker]:
+    def get_message(self) -> List[Talker]:
         """
         获取未处理确认的消息
-        :param is_bv: 是否要获取bv号
         :return: 一个未读的消息列表（只返回与关注列表有关的消息）
         """
         params = {
@@ -62,11 +63,22 @@ class Bilibili:
         resp = requests.get(self.GET_MESSAGE_URL, headers=self.HEADERS, cookies=self.COOKIES, params=params)
         message_data = resp.json()["data"]["session_list"]
         talker = []
+
         for message in message_data:
             if message["unread_count"] > 0:
                 last_msg = message["last_msg"]
+                log.info("信息初始内容为:" + last_msg["content"])
+                content_json = eval(last_msg["content"])
+                id_ = None
+                if content_json.get("bvid") is not None:
+                    id_ = content_json["bvid"]
+                if content_json.get("id") is not None:
+                    id_ = str(content_json["id"])
+                if content_json.get("content") is not None:
+                    id_ = self.find_bvid(content_json["content"])
+
                 talker_id = message["talker_id"]
-                content = self.format_bvid(last_msg["content"]) if is_bv else eval(last_msg["content"])["content"]
+                content = id_
                 msg_seqno = last_msg["msg_seqno"]
                 talker_info = Talker(talker_id, content, msg_seqno)
                 talker.append(talker_info)
@@ -130,16 +142,22 @@ class Bilibili:
 
         raise Exception("消息发送失败")
 
-    def get_video_info(self, bv_id: str, page: int = 1) -> BilibiliVideoInfo:
+    def get_video_info(self, id_: str, page: int = 1) -> BilibiliVideoInfo:
         """
         获取视频的信息
-        :param bv_id: 视频bv号
+        :param id_: aid 或者 bvid
         :param page: 集数
         :return: 视频信息
         """
-        param = {
-            "bvid": bv_id
-        }
+        if "BV" in id_:
+            param = {
+                "bvid": id_
+            }
+        else:
+            param = {
+                "aid": id_
+            }
+
         resp = requests.get(self.GET_VIDEO_INFO, headers=self.HEADERS, params=param)
         info_resp = resp.json()
         if info_resp["code"] == 0:
@@ -154,22 +172,29 @@ class Bilibili:
                 raise Exception("没有找到对应的cid")
 
             video_info = BilibiliVideoInfo(
-                bv_id=bv_id,
+                id_=data["bvid"],
                 cid=cid,
                 title=data["title"],
                 desc=data["desc"],
-                subtitle=self._get_subtitle(bv_id, cid),
+                subtitle=self._get_subtitle(data["bvid"], cid),
             )
 
             return video_info
 
     @staticmethod
-    def format_bvid(message: str) -> str:
-        try:
-            json_data = json.loads(message)
-            return json_data["bvid"]
-        except Exception:
-            return ""
+    def find_bvid(content: str) -> Union[str, None]:
+        """
+        查找bvid
+        :param content: 内容
+        :return: bvid
+        """
+        pattern = r"(BV[A-Za-z0-9]+)"
+        match = re.search(pattern, content)
+        if match:
+            bvid = match.group(1)
+            return bvid
+        else:
+            return None
 
     def _get_subtitle(self, bv_id: str, cid: int) -> str:
         """
