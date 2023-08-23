@@ -1,0 +1,6 @@
+config.toml
+*.log
+.space
+Spacefile
+/__pycache__/
+.idea
