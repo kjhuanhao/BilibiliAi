@@ -4,7 +4,6 @@
 # @Author    : LaiJiahao
 # @Desc      : 监听信息
 
-import time
 import toml
 
 from utils.bilibili import Bilibili
@@ -59,5 +58,3 @@ class ListenMessage:
                 b.ack_message(current_message.talker_id, current_message.ack_seqno)
             else:
                 log.info("current_message 未定义")
-
-    print("程序启动成功")
