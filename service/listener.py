@@ -52,7 +52,7 @@ class ListenMessage:
                         send_message = b.send_message(message.talker_id, to_message)
                         log.info(f"发送AI消息完成：{send_message}")
 
-                time.sleep(40)
+                time.sleep(20)
             except Exception as e:
                 log.error(f"监听消息出现异常,向用户发送异常消息：{e}")
                 if 'current_message' in locals():
